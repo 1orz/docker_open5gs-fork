@@ -10,7 +10,7 @@ mme:
     freeDiameter: /open5gs/install/etc/freeDiameter/mme.conf
     s1ap:
       server:
-        - dev: MME_IF
+        - address: MME_IP
     gtpc:
       server:
         - dev: MME_IF
@@ -19,22 +19,7 @@ mme:
           - address: SGWC_IP
         smf:
           - address: SMF_IP
-    sgsap:
-      client:
-        - address: OSMOMSC_IP
-          local_address: MME_IP
-          map:
-            tai:
-              plmn_id:
-                mcc: MCC
-                mnc: MNC
-              tac: TAC
-            lai:
-              plmn_id:
-                mcc: MCC
-                mnc: MNC
-              lac: 1
-    gummei: 
+    gummei:
       - plmn_id:
           mcc: MCC
           mnc: MNC
