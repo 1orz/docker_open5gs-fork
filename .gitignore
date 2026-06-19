@@ -6,3 +6,22 @@ log/
 **/*.db-shm
 **/*.db-wal
 backups/
+aibot/voice_secrets.env
+aibot/claude_secrets.env
+
+# Editor/backup files
+*.bak
+*.bak2
+*.orig
+
+# Audio test artifacts (bridge/AI-call recordings, TTS samples)
+**/*.wav
+**/*.pcm
+**/*.mp3
+**/*.opus
+
+# AMR-WB build outputs: build scripts in amrwb_build/ are kept; the compiled
+# .so/.libs are duplicated into freeswitch/ (tracked there for deploy), so ignore
+# the build-dir copies. build.log already covered by **/*.log above.
+amrwb_build/*.so
+amrwb_build/*.so.*

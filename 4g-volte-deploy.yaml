@@ -2,6 +2,7 @@ services:
   mongo:
     image: mongo:6.0
     container_name: mongo
+    restart: unless-stopped
     command: --bind_ip 0.0.0.0
     env_file:
       - .env
@@ -16,9 +17,11 @@ services:
     networks:
       default:
         ipv4_address: ${MONGO_IP}
+        ipv6_address: ${MONGO_IP6}
   webui:
-    image: docker_open5gs
+    image: cloudorz/open5gs:2.7.7
     container_name: webui
+    restart: unless-stopped
     depends_on:
       - mongo
     env_file:
@@ -36,9 +39,11 @@ services:
     networks:
       default:
         ipv4_address: ${WEBUI_IP}
+        ipv6_address: ${WEBUI_IP6}
   hss:
-    image: docker_open5gs
+    image: cloudorz/open5gs:2.7.7
     container_name: hss
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -58,12 +63,14 @@ services:
     networks:
       default:
         ipv4_address: ${HSS_IP}
+        ipv6_address: ${HSS_IP6}
   sgwc:
-    image: docker_open5gs
+    image: cloudorz/open5gs:2.7.7
     depends_on:
       - smf
       - upf
     container_name: sgwc
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -79,12 +86,14 @@ services:
     networks:
       default:
         ipv4_address: ${SGWC_IP}
+        ipv6_address: ${SGWC_IP6}
   sgwu:
-    image: docker_open5gs
+    image: cloudorz/open5gs:2.7.7
     depends_on:
       - smf
       - upf
     container_name: sgwu
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -102,9 +111,11 @@ services:
     networks:
       default:
         ipv4_address: ${SGWU_IP}
+        ipv6_address: ${SGWU_IP6}
   smf:
-    image: docker_open5gs
+    image: cloudorz/open5gs:2.7.7
     container_name: smf
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -127,11 +138,13 @@ services:
     networks:
       default:
         ipv4_address: ${SMF_IP}
+        ipv6_address: ${SMF_IP6}
   upf:
-    image: docker_open5gs
+    image: cloudorz/open5gs:2.7.7
     depends_on:
       - smf
     container_name: upf
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -150,19 +163,23 @@ services:
     privileged: true
     sysctls:
       - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv6.conf.all.forwarding=1
     networks:
       default:
         ipv4_address: ${UPF_IP}
+        ipv6_address: ${UPF_IP6}
   mme:
-    image: docker_open5gs
+    image: cloudorz/open5gs:2.7.7
     depends_on:
       - hss
       - sgwc
       - sgwu
       - smf
       - upf
-      - osmomsc
+#      - osmomsc
     container_name: mme
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -185,9 +202,11 @@ services:
     networks:
       default:
         ipv4_address: ${MME_IP}
+        ipv6_address: ${MME_IP6}
   pcrf:
-    image: docker_open5gs
+    image: cloudorz/open5gs:2.7.7
     container_name: pcrf
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -207,10 +226,12 @@ services:
     networks:
       default:
         ipv4_address: ${PCRF_IP}
+        ipv6_address: ${PCRF_IP6}
   dns:
     build: ./dns
     image: docker_dns
     container_name: dns
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
@@ -222,10 +243,12 @@ services:
     networks:
       default:
         ipv4_address: ${DNS_IP}
+        ipv6_address: ${DNS_IP6}
   rtpengine:
-    build: ./rtpengine
-    image: docker_rtpengine
+    image: cloudorz/rtpengine:mr13.5.1.16
     container_name: rtpengine
+    restart: unless-stopped
+    entrypoint: ["/mnt/rtpengine/rtpengine_init.sh"]
     privileged: true
     env_file:
       - .env
@@ -238,6 +261,7 @@ services:
     environment:
       - TABLE=0
       - INTERFACE=${RTPENGINE_IP}
+      - INTERFACE6=${RTPENGINE_IP6}
       - LISTEN_NG=${RTPENGINE_IP}:2223
       - PIDFILE=/run/ngcp-rtpengine-daemon.pid
       - PORT_MAX=50000
@@ -250,10 +274,12 @@ services:
     networks:
       default:
         ipv4_address: ${RTPENGINE_IP}
+        ipv6_address: ${RTPENGINE_IP6}
   mysql:
     build: ./mysql
     image: docker_mysql
     container_name: mysql
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
@@ -265,10 +291,11 @@ services:
     networks:
       default:
         ipv4_address: ${MYSQL_IP}
+        ipv6_address: ${MYSQL_IP6}
   pyhss:
-    build: ./pyhss
-    image: docker_pyhss
+    image: cloudorz/pyhss:1.0.2
     container_name: pyhss
+    restart: unless-stopped
     dns: ${DNS_IP}
     volumes:
       - ./pyhss:/mnt/pyhss
@@ -289,9 +316,57 @@ services:
     networks:
       default:
         ipv4_address: ${PYHSS_IP}
+        ipv6_address: ${PYHSS_IP6}
+  pyhss-gui:
+    image: ghcr.io/zarya/pyhss-gui:master
+    container_name: pyhss-gui
+    restart: unless-stopped
+    depends_on:
+      - pyhss
+    ports:
+      - "8999:80/tcp"
+    networks:
+      default:
+        ipv4_address: ${PYHSS_GUI_IP}
+        ipv6_address: ${PYHSS_GUI_IP6}
+  freeswitch:
+    image: cloudorz/freeswitch:1.11.1
+    container_name: freeswitch
+    restart: unless-stopped
+    dns: ${DNS_IP}
+    entrypoint: ["sh", "/mnt/freeswitch/freeswitch_init.sh"]
+    volumes:
+      - ./freeswitch:/mnt/freeswitch
+      - ./aibot/shared:/shared
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - .env
+    depends_on:
+      - dns
+      - scscf
+    networks:
+      default:
+        ipv4_address: ${FREESWITCH_IP}
+        ipv6_address: ${FREESWITCH_IP6}
+  voice-bridge:
+    image: open5gs_voicebridge
+    container_name: voice-bridge
+    restart: unless-stopped
+    dns: 8.8.8.8
+    env_file:
+      - .env
+      - ./aibot/voice_secrets.env
+    depends_on:
+      - freeswitch
+    networks:
+      default:
+        ipv4_address: ${VOICEBRIDGE_IP}
+        ipv6_address: ${VOICEBRIDGE_IP6}
   icscf:
-    image: docker_kamailio
+    image: cloudorz/kamailio:6.1.3
     container_name: icscf
+    restart: unless-stopped
     dns: ${DNS_IP}
     volumes:
       - ./icscf:/mnt/icscf
@@ -313,9 +388,11 @@ services:
     networks:
       default:
         ipv4_address: ${ICSCF_IP}
+        ipv6_address: ${ICSCF_IP6}
   scscf:
-    image: docker_kamailio
+    image: cloudorz/kamailio:6.1.3
     container_name: scscf
+    restart: unless-stopped
     dns: ${DNS_IP}
     volumes:
       - ./scscf:/mnt/scscf
@@ -337,9 +414,11 @@ services:
     networks:
       default:
         ipv4_address: ${SCSCF_IP}
+        ipv6_address: ${SCSCF_IP6}
   pcscf:
-    image: docker_kamailio
+    image: cloudorz/kamailio:6.1.3
     container_name: pcscf
+    restart: unless-stopped
     dns: ${DNS_IP}
     privileged: true
     cap_add:
@@ -371,9 +450,11 @@ services:
     networks:
       default:
         ipv4_address: ${PCSCF_IP}
+        ipv6_address: ${PCSCF_IP6}
   smsc:
-    image: docker_kamailio
+    image: cloudorz/kamailio:6.1.3
     container_name: smsc
+    restart: unless-stopped
     dns: ${DNS_IP}
     volumes:
       - ./smsc:/mnt/smsc
@@ -392,47 +473,53 @@ services:
     networks:
       default:
         ipv4_address: ${SMSC_IP}
-  osmomsc:
-    build: ./osmomsc
-    image: docker_osmomsc
-    container_name: osmomsc
-    volumes:
-      - ./osmomsc:/mnt/osmomsc
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - .env
-    environment:
-      - COMPONENT_NAME=osmomsc
-    depends_on:
-      - osmohlr
-    expose:
-      - "29118/sctp"
-      - "2775/tcp"
-    networks:
-      default:
-        ipv4_address: ${OSMOMSC_IP}
-  osmohlr:
-    build: ./osmohlr
-    image: docker_osmohlr
-    container_name: osmohlr
-    volumes:
-      - ./osmohlr:/mnt/osmohlr
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - .env
-    environment:
-      - COMPONENT_NAME=osmohlr
-    expose:
-      - "4222/tcp"
-    networks:
-      default:
-        ipv4_address: ${OSMOHLR_IP}
+        ipv6_address: ${SMSC_IP6}
+#  osmomsc:
+#    build: ./osmomsc
+#    image: docker_osmomsc
+#    container_name: osmomsc
+#    restart: unless-stopped
+#    volumes:
+#      - ./osmomsc:/mnt/osmomsc
+#      - /etc/timezone:/etc/timezone:ro
+#      - /etc/localtime:/etc/localtime:ro
+#    env_file:
+#      - .env
+#    environment:
+#      - COMPONENT_NAME=osmomsc
+#    depends_on:
+#      - osmohlr
+#    expose:
+#      - "29118/sctp"
+#      - "2775/tcp"
+#    networks:
+#      default:
+#        ipv4_address: ${OSMOMSC_IP}
+#        ipv6_address: ${OSMOMSC_IP6}
+#  osmohlr:
+#    build: ./osmohlr
+#    image: docker_osmohlr
+#    container_name: osmohlr
+#    restart: unless-stopped
+#    volumes:
+#      - ./osmohlr:/mnt/osmohlr
+#      - /etc/timezone:/etc/timezone:ro
+#      - /etc/localtime:/etc/localtime:ro
+#    env_file:
+#      - .env
+#    environment:
+#      - COMPONENT_NAME=osmohlr
+#    expose:
+#      - "4222/tcp"
+#    networks:
+#      default:
+#        ipv4_address: ${OSMOHLR_IP}
+#        ipv6_address: ${OSMOHLR_IP6}
   metrics:
     build: ./metrics
     image: docker_metrics
     container_name: metrics
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
@@ -446,6 +533,7 @@ services:
     networks:
       default:
         ipv4_address: ${METRICS_IP}
+        ipv6_address: ${METRICS_IP6}
   grafana:
     image: grafana/grafana:11.3.0
     container_name: grafana
@@ -471,12 +559,16 @@ services:
     networks:
       default:
         ipv4_address: ${GRAFANA_IP}
+        ipv6_address: ${GRAFANA_IP6}
 networks:
   default:
     name: docker_open5gs_default
+    enable_ipv6: true
     ipam:
       config:
         - subnet: ${TEST_NETWORK}
+        - subnet: ${TEST_NETWORK6}
+          gateway: ${TEST_NETWORK6_GW}
 volumes:
   grafana_data:
     name: grafana_data

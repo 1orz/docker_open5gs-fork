@@ -1,0 +1,37 @@
+<profile name="ims">
+  <!-- IMS-facing SIP profile: receives conference INVITEs routed by S-CSCF -->
+  <settings>
+    <param name="sip-ip" value="FREESWITCH_IP"/>
+    <param name="rtp-ip" value="FREESWITCH_IP"/>
+    <param name="sip-port" value="5060"/>
+    <param name="context" value="ims"/>
+    <param name="sip-trace" value="yes"/>
+
+    <!-- This is a trusted network element (behind S-CSCF) -> no UA auth/registration -->
+    <param name="auth-calls" value="false"/>
+    <param name="auth-all-packets" value="false"/>
+    <param name="accept-blind-reg" value="true"/>
+    <param name="accept-blind-auth" value="true"/>
+
+    <!-- Codecs: include AMR for VoLTE if the build supports it, fall back to PCMA/PCMU.
+         Video (H264/VP8) is negotiated for the video conference. -->
+    <param name="inbound-codec-prefs" value="AMRWB,AMR,PCMA,PCMU,H264,VP8"/>
+    <param name="outbound-codec-prefs" value="AMRWB,AMR,PCMA,PCMU,H264,VP8"/>
+    <param name="inbound-codec-negotiation" value="generous"/>
+    <param name="inbound-late-negotiation" value="true"/>
+
+    <param name="dtmf-duration" value="2000"/>
+    <param name="rtp-timer-name" value="soft"/>
+    <param name="rtp-timeout-sec" value="300"/>
+    <param name="rtp-hold-timeout-sec" value="1800"/>
+
+    <!-- Keep media on FreeSWITCH so it can mix audio/video -->
+    <param name="inbound-bypass-media" value="false"/>
+    <param name="inbound-proxy-media" value="false"/>
+
+    <param name="enable-100rel" value="true"/>
+    <param name="manage-presence" value="false"/>
+    <param name="aggressive-nat-detection" value="false"/>
+    <param name="apply-nat-acl" value="none"/>
+  </settings>
+</profile>

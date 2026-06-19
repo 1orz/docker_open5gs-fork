@@ -48,6 +48,7 @@ smf:
       - 2001:4860:4860::8844
     p-cscf:
       - PCSCF_IP
+      - PCSCF_IP6
     mtu: 1450
     ctf:
       enabled: auto

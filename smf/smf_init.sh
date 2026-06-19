@@ -54,6 +54,8 @@ sed -i 's|UE_IPV4_INTERNET_APN_GATEWAY_IP|'$UE_IPV4_INTERNET_APN_GATEWAY_IP'|g' 
 sed -i 's|UE_IPV4_INTERNET_APN_SUBNET|'$UE_IPV4_INTERNET'|g' install/etc/open5gs/smf.yaml
 sed -i 's|UE_IPV4_IMS_TUN_IP|'$UE_IPV4_IMS_TUN_IP'|g' install/etc/open5gs/smf.yaml
 sed -i 's|UE_IPV4_IMS_SUBNET|'$UE_IPV4_IMS'|g' install/etc/open5gs/smf.yaml
+# v6 P-CSCF must be substituted BEFORE PCSCF_IP (it is a prefix of PCSCF_IP6)
+sed -i 's|PCSCF_IP6|'$PCSCF_IP6'|g' install/etc/open5gs/smf.yaml
 sed -i 's|PCSCF_IP|'$PCSCF_IP'|g' install/etc/open5gs/smf.yaml
 sed -i 's|MAX_NUM_UE|'$MAX_NUM_UE'|g' install/etc/open5gs/smf.yaml
 sed -i 's|SMF_IP|'$SMF_IP'|g' install/etc/freeDiameter/smf.conf

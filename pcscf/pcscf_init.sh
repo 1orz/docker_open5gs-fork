@@ -1,4 +1,5 @@
 #!/bin/bash
+printf '[client]\nskip-ssl\n' > /etc/my.cnf  # MySQL8 self-signed TLS: new mariadb-client verifies by default
 
 # BSD 2-Clause License
 
@@ -75,6 +76,8 @@ fi
 
 REGISTRATION_EXPIRES_ENV=3600
 
+# v6 P-CSCF listen must be substituted BEFORE PCSCF_IP (PCSCF_IP is a prefix of PCSCF_IP6)
+sed -i 's|PCSCF_IP6|'$PCSCF_IP6'|g' /etc/kamailio_pcscf/pcscf.cfg
 sed -i 's|PCSCF_IP|'$PCSCF_IP'|g' /etc/kamailio_pcscf/pcscf.cfg
 sed -i 's|REGISTRATION_EXPIRES_ENV|'$REGISTRATION_EXPIRES_ENV'|g' /etc/kamailio_pcscf/pcscf.cfg
 sed -i 's|SCP_IP|'$SCP_IP'|g' /etc/kamailio_pcscf/pcscf.cfg
@@ -97,6 +100,9 @@ sed -i 's|RTPENGINE_IP|'$RTPENGINE_IP'|g' /etc/kamailio_pcscf/route/rtp.cfg
 ip r add ${UE_IPV4_IMS} via ${UPF_IP}
 # Route needed for VoWiFi client where internet APN is used
 ip r add ${UE_IPV4_INTERNET} via ${UPF_IP}
+# IPv6 dual-stack: same return routes for the UE v6 IMS/internet pools via UPF
+[ -n "${UE_IPV6_IMS}" ]      && ip -6 r add ${UE_IPV6_IMS} via ${UPF_IP6} 2>/dev/null || true
+[ -n "${UE_IPV6_INTERNET}" ] && ip -6 r add ${UE_IPV6_INTERNET} via ${UPF_IP6} 2>/dev/null || true
 
 rm -f /kamailio_pcscf.pid
 exec kamailio -f /etc/kamailio_pcscf/kamailio_pcscf.cfg -P /kamailio_pcscf.pid -m 32 -M 1024 -DD -E -e $@

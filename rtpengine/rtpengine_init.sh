@@ -49,6 +49,8 @@ LISTEN_CLI="$(awk 'END{print $1}' /etc/hosts):9901"
 OPTIONS=""
 OPTIONS="$OPTIONS --interface=$INTERFACE --listen-ng=$LISTEN_NG --listen-cli=$LISTEN_CLI --pidfile=$PIDFILE --port-min=$PORT_MIN --port-max=$PORT_MAX "
 OPTIONS="$OPTIONS --table=$TABLE  --tos=$TOS --foreground"
+# IPv6 dual-stack media: add a second (v6) interface so rtpengine can proxy v6 RTP
+[ -n "$INTERFACE6" ] && OPTIONS="$OPTIONS --interface=[$INTERFACE6]"
 
 if test "$NO_FALLBACK" = "yes" ; then
 	OPTIONS="$OPTIONS --no-fallback"
@@ -63,6 +65,9 @@ set +e
 ip r add ${UE_IPV4_IMS} via ${UPF_IP}
 # Route needed for VoWiFi client where internet APN is used
 ip r add ${UE_IPV4_INTERNET} via ${UPF_IP}
+# IPv6 dual-stack: same return routes for the UE v6 pools via UPF
+[ -n "${UE_IPV6_IMS}" ]      && ip -6 r add ${UE_IPV6_IMS} via ${UPF_IP6} 2>/dev/null || true
+[ -n "${UE_IPV6_INTERNET}" ] && ip -6 r add ${UE_IPV6_INTERNET} via ${UPF_IP6} 2>/dev/null || true
 
 set -x
 

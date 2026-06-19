@@ -1,0 +1,18 @@
+<include>
+  <!-- Context for INVITEs routed here from the S-CSCF (via iFC) -->
+  <context name="ims">
+
+    <!-- AI voice assistant: dialed 5001/5002 -> bridge the caller's audio full-duplex
+         to the realtime voice bridge (Doubao end-to-end). FreeSWITCH is the ws client
+         (uuid_audio_stream), the voice-bridge container is the ws server on :8090. -->
+    <extension name="ims_ai_bot">
+      <condition field="destination_number" expression="^(5001|5002)$">
+        <action application="log" data="INFO IMS-AI realtime INVITE to ${destination_number} from ${sip_from_user}"/>
+        <action application="answer"/>
+        <action application="set" data="as_res=${uuid_audio_stream(${uuid} start ws://VOICEBRIDGE_IP:8090 mono 16000)}"/>
+        <action application="park"/>
+      </condition>
+    </extension>
+
+  </context>
+</include>

@@ -73,6 +73,33 @@
         </InitialFilterCriteria> -->
 
 
+        <!-- AI voice bot: originating INVITE dialed to 5001/5002 -> FreeSWITCH AS -->
+        <InitialFilterCriteria>
+            <Priority>5</Priority>
+            <TriggerPoint>
+                <ConditionTypeCNF>1</ConditionTypeCNF>
+                <SPT>
+                    <ConditionNegated>0</ConditionNegated>
+                    <Group>0</Group>
+                    <Method>INVITE</Method>
+                </SPT>
+                <SPT>
+                    <ConditionNegated>0</ConditionNegated>
+                    <Group>1</Group>
+                    <SessionCase>0</SessionCase>
+                </SPT>
+                <SPT>
+                    <ConditionNegated>0</ConditionNegated>
+                    <Group>2</Group>
+                    <RequestURI>(sip|tel):500[12].*</RequestURI>
+                </SPT>
+            </TriggerPoint>
+            <ApplicationServer>
+                <ServerName>sip:172.22.0.51:5060</ServerName>
+                <DefaultHandling>0</DefaultHandling>
+            </ApplicationServer>
+        </InitialFilterCriteria>
+
         <!-- SIP MESSAGE Traffic -->
         <InitialFilterCriteria>
             <Priority>20</Priority>

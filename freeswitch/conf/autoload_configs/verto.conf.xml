@@ -1,0 +1,33 @@
+<configuration name="verto.conf" description="HTML5 Verto Endpoint (WebRTC)">
+  <settings>
+    <param name="debug" value="0"/>
+    <param name="enable-presence" value="true"/>
+    <param name="enable-fs-path" value="true"/>
+  </settings>
+  <profiles>
+    <!-- WebRTC signaling: ws on 8081, wss on 8082. bind to the container IP;
+         publish 8081/8082 (+ an RTP range) on the host for LAN browsers.
+         ext-rtp-ip = the host IP browsers reach, so ICE offers a routable candidate. -->
+    <profile name="default-v4">
+      <param name="bind-local" value="FREESWITCH_IP:8081"/>
+      <param name="bind-local" value="FREESWITCH_IP:8082" secure="true"/>
+      <param name="force-register-domain" value="IMS_DOMAIN"/>
+      <param name="userauth" value="true"/>
+      <param name="mcast-ip" value="224.1.1.1"/>
+      <param name="mcast-port" value="1337"/>
+      <param name="rtp-ip" value="FREESWITCH_IP"/>
+      <param name="ext-rtp-ip" value="DOCKER_HOST_IP"/>
+      <param name="local-network" value="localnet.auto"/>
+      <param name="outbound-codec-string" value="opus,vp8,h264"/>
+      <param name="inbound-codec-string" value="opus,vp8,h264"/>
+      <param name="apply-candidate-acl" value="wan.auto"/>
+      <param name="apply-candidate-acl" value="rfc1918.auto"/>
+      <param name="apply-candidate-acl" value="localnet.auto"/>
+      <param name="timer-name" value="soft"/>
+      <!-- wss needs a cert at conf/ssl/wss.pem — see README to generate it -->
+      <param name="cert" value="$${certs_dir}/wss.pem"/>
+      <param name="key"  value="$${certs_dir}/wss.pem"/>
+      <param name="chain" value="$${certs_dir}/wss.pem"/>
+    </profile>
+  </profiles>
+</configuration>

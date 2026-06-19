@@ -1,4 +1,5 @@
 #!/bin/bash
+printf '[client]\nskip-ssl\n' > /etc/my.cnf  # MySQL8 self-signed TLS: new mariadb-client verifies by default
 
 # BSD 2-Clause License
 
